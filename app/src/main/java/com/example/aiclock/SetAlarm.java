@@ -2,6 +2,11 @@ package com.example.aiclock;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -14,17 +19,23 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.PagerAdapter;
+
+import com.bigkoo.pickerview.builder.TimePickerBuilder;
+import com.bigkoo.pickerview.listener.OnTimeSelectListener;
+import com.bigkoo.pickerview.view.TimePickerView;
 import com.example.alarmmanagerclock.AlarmManagerUtil;
-import com.bigkoo.pickerview.TimePickerView;
 import com.example.aiclock.view.SelectRemindCyclePopup;
 import com.example.aiclock.view.SelectRemindWayPopup;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.prefs.Preferences;
 
 public class SetAlarm extends AppCompatActivity implements View.OnClickListener {
-    private TextView date_tv;
+    private TextView date_tv,test_sound;
     private TimePickerView pvTime;
     private RelativeLayout repeat_rl, ring_rl,label_rl,soundtrack_rl;
     private TextView tv_repeat_value, tv_ring_value,tv_alarm_label,tv_soundtrack_value;
@@ -34,11 +45,14 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
     private int cycle;
     private int ring;
     private static final int request_code= 0;
+    public static final String EXTRA_REPLY = "com.example.aiclock.extra.REPLY";
+    public static Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.set_alarm);
+        test_sound = (TextView) findViewById(R.id.test_sound);
         allLayout = (LinearLayout) findViewById(R.id.all_layout);
         set_btn = (Button) findViewById(R.id.set_btn);
         set_btn.setOnClickListener(this);
@@ -57,19 +71,33 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
         tv_ring_value = (TextView) findViewById(R.id.tv_ring_value);
         tv_alarm_label = (TextView) findViewById(R.id.label_value);
         tv_soundtrack_value = (TextView) findViewById(R.id.label_soundValue);
-        pvTime = new TimePickerView(this, TimePickerView.Type.HOURS_MINS);
-        pvTime.setTime(new Date());
-        pvTime.setCyclic(false);
-        pvTime.setCancelable(true);
-        //时间选择后回调
-        pvTime.setOnTimeSelectListener(new TimePickerView.OnTimeSelectListener() {
-
+//        pvTime = new TimePickerView(this, TimePickerView.Type.HOURS_MINS);
+//        pvTime.setTime(new Date());
+//        pvTime.setCyclic(false);
+//        pvTime.setCancelable(true);
+        pvTime = new TimePickerBuilder(SetAlarm.this, new OnTimeSelectListener() {
             @Override
-            public void onTimeSelect(Date date) {
+            public void onTimeSelect(Date date, View v) {
                 time = getTime(date);
                 date_tv.setText(time);
             }
-        });
+        })
+                .setType(new boolean[]{false,false,false,true,true,false})// 默认全部显示
+        .isCyclic(true)
+                .setLabel("","","","","","")
+                .setTitleText("Choose your time")
+                .setTextColorCenter(getResources().getColor(R.color.colorLightBlue))
+
+                .build();
+        //时间选择后回调
+//        pvTime.setOnTimeSelectListener(new TimePickerView.OnTimeSelectListener() {
+//
+//            @Override
+//            public void onTimeSelect(Date date) {
+//                time = getTime(date);
+//                date_tv.setText(time);
+//            }
+//        });
 
         date_tv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,14 +131,67 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
             case R.id.alarm_soundtrack:
                 choosesound();
                 break;
+            case R.id.btn_cancel_set:
+                finish();
+                break;
             default:
                 break;
         }
     }
-private void choosesound(){
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent,request_code);
+
+
+
+    private void choosesound(){
+        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE,RingtoneManager.TYPE_ALARM);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT,true);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI,RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
+        startActivityForResult(intent,0);
+
+
 }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode==0)
+        {
+            if(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI) != null)
+            {
+
+                uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                if (uri!=null)
+                {
+
+                       String ringtone = RingtoneManager.getRingtone(this,uri).getTitle(this);
+                       tv_soundtrack_value.setText(ringtone);
+                }
+                else
+                {
+                    Toast.makeText(this, "no ringtone", Toast.LENGTH_SHORT).show();
+                }
+            }
+            else
+            {
+                finish();
+            }
+//            if(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI) != null){
+//                Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+//                if(uri != null)
+//                {
+//                    RingtoneManager.setActualDefaultRingtoneUri(this,RingtoneManager.TYPE_ALARM,uri);
+////                    String reply = uri.toString();
+////                    Intent replyIntent = new Intent();
+////                    replyIntent.putExtra(EXTRA_REPLY,reply);
+////                    setResult(RESULT_OK,replyIntent);
+////                    finish();
+//                }
+//            }
+
+
+        }
+    }
+
         private void inputLabel() {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             LayoutInflater li = LayoutInflater.from(this);
@@ -144,25 +225,80 @@ private void choosesound(){
 
         }
 
-    private void setClock() {
-        if (time != null && time.length() > 0) {
-            String[] times = time.split(":");
-            if (cycle == 0) {//是每天的闹钟
-                AlarmManagerUtil.setAlarm(this, 0, Integer.parseInt(times[0]), Integer.parseInt
-                        (times[1]), 0, 0, "!!!", ring);
-            } if(cycle == -1){//是只响一次的闹钟
-                AlarmManagerUtil.setAlarm(this, 1, Integer.parseInt(times[0]), Integer.parseInt
-                        (times[1]), 0, 0, "!!!", ring);
-            }else {//多选，周几的闹钟
-                String weeksStr = parseRepeat(cycle, 1);
-                String[] weeks = weeksStr.split(",");
-                for (int i = 0; i < weeks.length; i++) {
-                    AlarmManagerUtil.setAlarm(this, 2, Integer.parseInt(times[0]), Integer
-                            .parseInt(times[1]), i, Integer.parseInt(weeks[i]), "!!!", ring);
-                }
+        private int checknull(){
+        int hasnull = 0;
+            String alarmdate,alarmlabel,alarmmode;
+            alarmdate = date_tv.getText().toString();
+            alarmlabel=tv_alarm_label.getText().toString();
+            alarmmode =tv_ring_value.getText().toString();
+            if(alarmlabel == "") {
+                tv_alarm_label.setError("error");
+                hasnull = 1;
             }
-            Toast.makeText(this, "Alarm Set", Toast.LENGTH_LONG).show();
+            else
+            {
+                tv_alarm_label.setError(null);
+                hasnull = 0;
+
+            }
+            if (alarmdate == "")
+            {
+                date_tv.setError("error");
+                hasnull = 1;
+            }
+            else
+            {
+                date_tv.setError(null);
+                hasnull = 0;
+            }
+            if (alarmmode == "")
+            {
+                tv_ring_value.setError("error");
+                hasnull = 1;
+            }
+            else
+            {
+                tv_ring_value.setError(null);
+                hasnull =0;
+            }
+            if (time == null)
+            {
+                Toast.makeText(this, "Please Select a Time.", Toast.LENGTH_SHORT).show();
+                hasnull = 1;
+            }
+            else
+            {
+                hasnull = 0;
+            }
+
+            return hasnull;
         }
+    private void setClock() {
+
+       if (checknull() == 0) {
+           if (time != null && time.length() > 0) {
+               String[] times = time.split(":");
+               if (cycle == 0) {//是每天的闹钟
+                   AlarmManagerUtil.setAlarm(this, 0, Integer.parseInt(times[0]), Integer.parseInt
+                           (times[1]), 0, 0, tv_alarm_label.getText().toString(), ring,uri);
+               }
+               if (cycle == -1) {//是只响一次的闹钟
+                   AlarmManagerUtil.setAlarm(this, 1, Integer.parseInt(times[0]), Integer.parseInt
+                           (times[1]), 0, 0, tv_alarm_label.getText().toString(), ring,uri);
+               } else {//多选，周几的闹钟
+                   String weeksStr = parseRepeat(cycle, 1);
+                   String[] weeks = weeksStr.split(",");
+                   for (int i = 0; i < weeks.length; i++) {
+                       AlarmManagerUtil.setAlarm(this, 2, Integer.parseInt(times[0]), Integer
+                               .parseInt(times[1]), i, Integer.parseInt(weeks[i]), tv_alarm_label.getText().toString(), ring,uri);
+                   }
+               }
+               Toast.makeText(this, uri.toString(), Toast.LENGTH_LONG).show();
+               finish();
+
+           }
+       }
+
 
     }
 

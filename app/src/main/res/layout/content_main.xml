@@ -44,7 +44,7 @@
         />
 
     <com.baoyz.swipemenulistview.SwipeMenuListView
-        android:id="@+id/swipeMenuListView"
+        android:id="@+id/alarmList"
         android:layout_width="wrap_content"
         android:layout_height="350dp"
         android:layout_marginStart="8dp"

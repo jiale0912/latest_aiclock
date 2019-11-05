@@ -3,9 +3,12 @@ package com.example.alarmmanagerclock;
 import android.app.Activity;
 import android.app.Service;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.view.View;
+
+import java.io.IOException;
 
 
 public class ClockAlarmActivity extends Activity {
@@ -18,14 +21,21 @@ public class ClockAlarmActivity extends Activity {
         setContentView(R.layout.activity_clock_alarm);
         String message = this.getIntent().getStringExtra("msg");
         int flag = this.getIntent().getIntExtra("flag", 0);
-        showDialogInBroadcastReceiver(message, flag);
+        Uri soundtrack = Uri.parse(this.getIntent().getStringExtra("soundtrack"));
+        showDialogInBroadcastReceiver(message, flag, soundtrack);
     }
 
-    private void showDialogInBroadcastReceiver(String message, final int flag) {
+    private void showDialogInBroadcastReceiver(String message, final int flag, Uri soundtrack) {
         if (flag == 1 || flag == 2) {
-            mediaPlayer = MediaPlayer.create(this, R.raw.in_call_alarm);
-            mediaPlayer.setLooping(true);
-            mediaPlayer.start();
+            mediaPlayer = new MediaPlayer();
+            try {
+                mediaPlayer.setDataSource(this, soundtrack);
+                mediaPlayer.setLooping(true);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         //数组参数意义：第一个参数为等待指定时间后开始震动，震动时间为第二个参数。后边的参数依次为等待震动和震动的时间
         //第二个参数为重复次数，-1为不重复，0为一直震动

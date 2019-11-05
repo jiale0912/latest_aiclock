@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 
 
@@ -41,9 +42,10 @@ public class AlarmManagerUtil {
      * @param week            week=0表示一次性闹钟或者按天的周期性闹钟，非0 的情况下是几就代表以周为周期性的周几的闹钟
      * @param tips            闹钟提示信息
      * @param soundOrVibrator 2表示声音和震动都执行，1表示只有铃声提醒，0表示只有震动提醒
+     * @param soundtrack the soundtrack for the alarm
      */
     public static void setAlarm(Context context, int flag, int hour, int minute, int id, int
-            week, String tips, int soundOrVibrator) {
+            week, String tips, int soundOrVibrator, Uri soundtrack) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Calendar calendar = Calendar.getInstance();
         long intervalMillis = 0;
@@ -61,6 +63,7 @@ public class AlarmManagerUtil {
         intent.putExtra("msg", tips);
         intent.putExtra("id", id);
         intent.putExtra("soundOrVibrator", soundOrVibrator);
+        intent.putExtra("soundtrack",soundtrack.toString());
         PendingIntent sender = PendingIntent.getBroadcast(context, id, intent, PendingIntent
                 .FLAG_CANCEL_CURRENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
