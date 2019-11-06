@@ -141,7 +141,7 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
                 finish();
                 break;
             case R.id.btn_viewdata:
-                Toast.makeText(this, db.getData(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, db.getData(), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.delete_data:
                 db.deleteall(this);
@@ -426,60 +426,60 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
             repeat = 127;
         }
         if (repeat % 2 == 1) {
-            cycle = "Monday";
+            cycle = "Mon";
             weeks = "1";
         }
         if (repeat % 4 >= 2) {
             if ("".equals(cycle)) {
-                cycle = "Tuesday";
+                cycle = "Tue";
                 weeks = "2";
             } else {
-                cycle = cycle + "," + "Tuesday";
+                cycle = cycle + "," + "Tue";
                 weeks = weeks + "," + "2";
             }
         }
         if (repeat % 8 >= 4) {
             if ("".equals(cycle)) {
-                cycle = "Wednesday";
+                cycle = "Wed";
                 weeks = "3";
             } else {
-                cycle = cycle + "," + "Wednesday";
+                cycle = cycle + "," + "Wed";
                 weeks = weeks + "," + "3";
             }
         }
         if (repeat % 16 >= 8) {
             if ("".equals(cycle)) {
-                cycle = "Thursday";
+                cycle = "Thu";
                 weeks = "4";
             } else {
-                cycle = cycle + "," + "Thursday";
+                cycle = cycle + "," + "Thu";
                 weeks = weeks + "," + "4";
             }
         }
         if (repeat % 32 >= 16) {
             if ("".equals(cycle)) {
-                cycle = "Friday";
+                cycle = "Fri";
                 weeks = "5";
             } else {
-                cycle = cycle + "," + "Friday";
+                cycle = cycle + "," + "Fri";
                 weeks = weeks + "," + "5";
             }
         }
         if (repeat % 64 >= 32) {
             if ("".equals(cycle)) {
-                cycle = "Saturday";
+                cycle = "Sat";
                 weeks = "6";
             } else {
-                cycle = cycle + "," + "Saturday";
+                cycle = cycle + "," + "Sat";
                 weeks = weeks + "," + "6";
             }
         }
         if (repeat / 64 == 1) {
             if ("".equals(cycle)) {
-                cycle = "Sunday";
+                cycle = "Sun";
                 weeks = "7";
             } else {
-                cycle = cycle + "," + "Sunday";
+                cycle = cycle + "," + "Sun";
                 weeks = weeks + "," + "7";
             }
         }

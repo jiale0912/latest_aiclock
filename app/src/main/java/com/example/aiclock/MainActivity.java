@@ -11,12 +11,18 @@ import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Switch;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +30,42 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private SwipeMenuListView myList;
+    private ArrayList<Alarm> list_array;
+    private AlarmListAdapter adapter;
+    private TextView alarminfo;
+    private Switch mySwitch;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getAlarm();
+        adapter = new AlarmListAdapter(this,R.layout.alarm_card,list_array);
+
+        myList.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getAlarm();
+        adapter = new AlarmListAdapter(this,R.layout.alarm_card,list_array);
+
+        myList.setAdapter(adapter);
+        if(myList.getCount()>0)
+        {
+            alarminfo.setText("Alarm on");
+        }
+        else
+        {
+            alarminfo.setText("No Alarm On");
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,13 +73,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        alarminfo = (TextView) findViewById(R.id.alarmstatus);
+        list_array = new ArrayList<>();
+        mySwitch = (Switch) findViewById(R.id.alarm_switch);
         myList = findViewById(R.id.alarmList);
+        getAlarm();
+        adapter = new AlarmListAdapter(this,R.layout.alarm_card,list_array);
+
+        myList.setAdapter(adapter);
+        if(myList.getCount()>0)
+        {
+            alarminfo.setText("Alarm on");
+        }
+        else
+        {
+            alarminfo.setText("No Alarm On");
+        }
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
            Intent intent = new Intent(MainActivity.this,SetAlarm.class);
-           startActivity(intent);
+           startActivityForResult(intent,0);
             }
         });
 
@@ -80,7 +137,17 @@ public class MainActivity extends AppCompatActivity {
 // set creator
 
         myList.setMenuCreator(creator);
+
+
     }
+
+    private void getAlarm() {
+        myDbAdapter db = new myDbAdapter(this);
+        list_array = db.getData();
+    }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -103,4 +170,5 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }

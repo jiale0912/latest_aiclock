@@ -3,10 +3,16 @@ package com.example.aiclock;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 import android.widget.Toast;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class myDbAdapter {
     myDbHelper myhelper;
@@ -14,6 +20,8 @@ public class myDbAdapter {
     public myDbAdapter(Context context) {
         myhelper = new myDbHelper(context);
     }
+
+
 
     public boolean insertData(int hour, int min, String tips, int week, int sov, String soundtrack) {
         SQLiteDatabase dbb = myhelper.getWritableDatabase();
@@ -41,25 +49,40 @@ public class myDbAdapter {
             e.printStackTrace();
         }
     }
+private Alarm cursorToAlarm(Cursor cursor){
+        Alarm alarm = new Alarm();
+    alarm.setId(cursor.getInt(cursor.getColumnIndex(myDbHelper.UID)));
+    alarm.setHour(cursor.getInt(cursor.getColumnIndex(myDbHelper.HOUR)));
+    alarm.setMin(cursor.getInt(cursor.getColumnIndex(myDbHelper.MIN)));
+    alarm.setTips(cursor.getString(cursor.getColumnIndex(myDbHelper.TIPS)));
+    alarm.setSoundtrack(Uri.parse(cursor.getString(cursor.getColumnIndex(myDbHelper.SOUNDTRACK))));
+    return alarm;
+}
 
-
-    public String getData()
+    public ArrayList<Alarm> getData()
         {
         SQLiteDatabase db = myhelper.getWritableDatabase();
+        ArrayList<Alarm> mydata = new ArrayList<>();
+        String QUERY = "SELECT * FROM "+ myDbHelper.TABLE_NAME;
         String[] columns = {myDbHelper.UID,myDbHelper.HOUR,myDbHelper.MIN,myDbHelper.TIPS,myDbHelper.SOUNDTRACK};
         Cursor cursor =db.query(myDbHelper.TABLE_NAME,columns,null,null,null,null,null);
         StringBuffer buffer= new StringBuffer();
-        while (cursor.moveToNext())
-        {
-            int cid =cursor.getInt(cursor.getColumnIndex(myDbHelper.UID));
-            String hour =cursor.getString(cursor.getColumnIndex(myDbHelper.HOUR));
-            String min =cursor.getString(cursor.getColumnIndex(myDbHelper.MIN));
-            String tips = cursor.getString(cursor.getColumnIndex(myDbHelper.TIPS));
-            String soundtrack = cursor.getString(cursor.getColumnIndex(myDbHelper.SOUNDTRACK));
+       try
+       {
+           cursor.moveToFirst();
+           while (!cursor.isAfterLast()) {
+               Alarm alarm = cursorToAlarm(cursor);
+               mydata.add(alarm);
+               cursor.moveToNext();
+           }
+           cursor.close();
+       }catch(Exception e)
+       {
+           e.printStackTrace();
+       }
 
-            buffer.append(cid+ "   " + hour + "   " + min + "   " + tips + "   " + soundtrack + " \n");
-        }
-        return buffer.toString();
+
+        return mydata;
     }
 
     public  int delete(String UID)

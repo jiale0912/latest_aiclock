@@ -52,6 +52,9 @@
         android:foregroundGravity="bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"></com.baoyz.swipemenulistview.SwipeMenuListView>
+        app:layout_constraintStart_toStartOf="parent"
+        android:divider="@color/colorBlack">
+
+    </com.baoyz.swipemenulistview.SwipeMenuListView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
