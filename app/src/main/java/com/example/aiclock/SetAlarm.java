@@ -40,18 +40,23 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
     private RelativeLayout repeat_rl, ring_rl,label_rl,soundtrack_rl;
     private TextView tv_repeat_value, tv_ring_value,tv_alarm_label,tv_soundtrack_value;
     private LinearLayout allLayout;
-    private Button set_btn,btn_cancel_set;
+    private Button set_btn,btn_cancel_set,view_data,delete_data;
     private String time;
     private int cycle;
     private int ring;
     private static final int request_code= 0;
     public static final String EXTRA_REPLY = "com.example.aiclock.extra.REPLY";
     public static Uri uri;
+    myDbAdapter db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.set_alarm);
+        delete_data = (Button) findViewById(R.id.delete_data);
+        delete_data.setOnClickListener(this);
+        view_data = (Button) findViewById(R.id.btn_viewdata);
+        view_data.setOnClickListener(this);
         test_sound = (TextView) findViewById(R.id.test_sound);
         allLayout = (LinearLayout) findViewById(R.id.all_layout);
         set_btn = (Button) findViewById(R.id.set_btn);
@@ -71,6 +76,7 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
         tv_ring_value = (TextView) findViewById(R.id.tv_ring_value);
         tv_alarm_label = (TextView) findViewById(R.id.label_value);
         tv_soundtrack_value = (TextView) findViewById(R.id.label_soundValue);
+        db = new myDbAdapter(this);
 //        pvTime = new TimePickerView(this, TimePickerView.Type.HOURS_MINS);
 //        pvTime.setTime(new Date());
 //        pvTime.setCyclic(false);
@@ -133,6 +139,13 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
                 break;
             case R.id.btn_cancel_set:
                 finish();
+                break;
+            case R.id.btn_viewdata:
+                Toast.makeText(this, db.getData(), Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.delete_data:
+                db.deleteall(this);
+                Toast.makeText(this, "Data cleared", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;
@@ -279,12 +292,21 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
            if (time != null && time.length() > 0) {
                String[] times = time.split(":");
                if (cycle == 0) {//是每天的闹钟
+//db.insertData(Integer.parseInt(times[0]), Integer.parseInt(times[1]),tv_alarm_label.getText().toString(),0,ring,uri.toString());
                    AlarmManagerUtil.setAlarm(this, 0, Integer.parseInt(times[0]), Integer.parseInt
                            (times[1]), 0, 0, tv_alarm_label.getText().toString(), ring,uri);
                }
                if (cycle == -1) {//是只响一次的闹钟
-                   AlarmManagerUtil.setAlarm(this, 1, Integer.parseInt(times[0]), Integer.parseInt
-                           (times[1]), 0, 0, tv_alarm_label.getText().toString(), ring,uri);
+                    if(db.insertData(Integer.parseInt(times[0]), Integer.parseInt(times[1]),tv_alarm_label.getText().toString(),0,ring,uri.toString()))
+                   {
+                       Toast.makeText(this, "data added", Toast.LENGTH_SHORT).show();
+                       AlarmManagerUtil.setAlarm(this, 1, Integer.parseInt(times[0]), Integer.parseInt
+                               (times[1]), 0, 0, tv_alarm_label.getText().toString(), ring,uri);
+                   }
+                    else{
+                        Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+                    }
+
                } else {//多选，周几的闹钟
                    String weeksStr = parseRepeat(cycle, 1);
                    String[] weeks = weeksStr.split(",");
@@ -293,7 +315,8 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
                                .parseInt(times[1]), i, Integer.parseInt(weeks[i]), tv_alarm_label.getText().toString(), ring,uri);
                    }
                }
-               Toast.makeText(this, uri.toString(), Toast.LENGTH_LONG).show();
+//               Toast.makeText(this, uri.toString(), Toast.LENGTH_LONG).show();
+
                finish();
 
            }

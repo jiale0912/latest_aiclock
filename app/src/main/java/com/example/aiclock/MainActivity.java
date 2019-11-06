@@ -9,7 +9,6 @@ import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
-import com.example.aiclock.backup.Alarm;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,8 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private List<Alarm> alarms;
-    private AlarmListAdapter adapter;
+
     private SwipeMenuListView myList;
 
     @Override
@@ -33,9 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        alarms = new ArrayList<>();
         myList = findViewById(R.id.alarmList);
-        adapter = new AlarmListAdapter(MainActivity.this,R.layout.alarm_card,alarms);
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
            startActivity(intent);
             }
         });
-        myList.setAdapter(adapter);
 
         SwipeMenuCreator creator = new SwipeMenuCreator() {
 
