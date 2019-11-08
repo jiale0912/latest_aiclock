@@ -29,7 +29,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             AlarmManagerUtil.setAlarmTime(context, System.currentTimeMillis() + intervalMillis,
                     intent);
         }
-        int flag = intent.getIntExtra("soundOrVibrator", 0);
+        int flag = intent.getIntExtra("soundOrVibrator",1);
         Intent clockIntent = new Intent(context, ClockAlarmActivity.class);
         clockIntent.putExtra("msg", msg);
         clockIntent.putExtra("flag", flag);

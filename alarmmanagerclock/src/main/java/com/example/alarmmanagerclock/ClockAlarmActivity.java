@@ -2,6 +2,7 @@ package com.example.alarmmanagerclock;
 
 import android.app.Activity;
 import android.app.Service;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,7 +30,8 @@ public class ClockAlarmActivity extends Activity {
         if (flag == 1 || flag == 2) {
             mediaPlayer = new MediaPlayer();
             try {
-                mediaPlayer.setDataSource(this, soundtrack);
+               mediaPlayer.setDataSource(this, soundtrack);
+                mediaPlayer.setVolume(100,100);
                 mediaPlayer.setLooping(true);
                 mediaPlayer.prepare();
                 mediaPlayer.start();
@@ -52,13 +54,18 @@ public class ClockAlarmActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (dialog.bt_confirm == v || dialog.bt_cancel == v) {
+
                     if (flag == 1 || flag == 2) {
-                        mediaPlayer.stop();
-                        mediaPlayer.release();
+
+                      mediaPlayer.stop();
+                       mediaPlayer.release();
                     }
-                    if (flag == 0 || flag == 2) {
+                    else if (flag == 0 || flag == 2) {
+
                         vibrator.cancel();
                     }
+                    Intent intent = new Intent(getApplicationContext(),imagedisplay.class);
+                    startActivity(intent);
                     dialog.dismiss();
                     finish();
                 }

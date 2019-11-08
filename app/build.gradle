@@ -38,6 +38,8 @@ dependencies {
     implementation 'com.baoyz.swipemenulistview:library:1.3.0'
     implementation project(path: ':alarmmanagerclock')
     implementation 'com.contrarywind:Android-PickerView:4.1.9'
-
+    implementation 'com.soundcloud.android:android-crop:1.0.1@aar'
+    // TensorFlow lite dependency
+    implementation 'org.tensorflow:tensorflow-lite:+'
 
 }

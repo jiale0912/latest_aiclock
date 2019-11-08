@@ -12,20 +12,20 @@ import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
+import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,19 +35,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView alarminfo;
     private Switch mySwitch;
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        getAlarm();
-        adapter = new AlarmListAdapter(this,R.layout.alarm_card,list_array);
 
-        myList.setAdapter(adapter);
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        getAlarm();
+        viewData();
         adapter = new AlarmListAdapter(this,R.layout.alarm_card,list_array);
 
         myList.setAdapter(adapter);
@@ -73,14 +66,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        final myDbAdapter myDB = new myDbAdapter(this);
         alarminfo = (TextView) findViewById(R.id.alarmstatus);
         list_array = new ArrayList<>();
         mySwitch = (Switch) findViewById(R.id.alarm_switch);
-        myList = findViewById(R.id.alarmList);
-        getAlarm();
+        myList = findViewById(R.id.alarm_list);
+        viewData();
+
         adapter = new AlarmListAdapter(this,R.layout.alarm_card,list_array);
 
         myList.setAdapter(adapter);
+
         if(myList.getCount()>0)
         {
             alarminfo.setText("Alarm on");
@@ -97,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
            startActivityForResult(intent,0);
             }
         });
+
 
         SwipeMenuCreator creator = new SwipeMenuCreator() {
 
@@ -137,15 +134,37 @@ public class MainActivity extends AppCompatActivity {
 // set creator
 
         myList.setMenuCreator(creator);
+       myList.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+           @Override
+           public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+               Alarm alarm = list_array.get(position);
 
+               switch (index)
+               {
+                   case 0:
+                       Toast.makeText(MainActivity.this, "add", Toast.LENGTH_SHORT).show();
+                       break;
+                   case 1:
+                        myDB.delete(alarm.getId());
+                       Toast.makeText(MainActivity.this, "delete", Toast.LENGTH_SHORT).show();
+                       onResume();
+                       viewData();
+                        break;
+                   default:
+                       break;
 
+               }
+               return false;
+           }
+       });
     }
 
-    private void getAlarm() {
+
+
+    private void viewData() {
         myDbAdapter db = new myDbAdapter(this);
         list_array = db.getData();
     }
-
 
 
 
@@ -170,5 +189,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 
 }

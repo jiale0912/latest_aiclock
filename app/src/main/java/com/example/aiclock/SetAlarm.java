@@ -47,6 +47,7 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
     private static final int request_code= 0;
     public static final String EXTRA_REPLY = "com.example.aiclock.extra.REPLY";
     public static Uri uri;
+    private static int alarmid =0;
     myDbAdapter db;
 
     @Override
@@ -141,7 +142,7 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
                 finish();
                 break;
             case R.id.btn_viewdata:
-//                Toast.makeText(this, db.getData(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, db.alldata().toString(), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.delete_data:
                 db.deleteall(this);
@@ -292,26 +293,39 @@ public class SetAlarm extends AppCompatActivity implements View.OnClickListener 
            if (time != null && time.length() > 0) {
                String[] times = time.split(":");
                if (cycle == 0) {//是每天的闹钟
-//db.insertData(Integer.parseInt(times[0]), Integer.parseInt(times[1]),tv_alarm_label.getText().toString(),0,ring,uri.toString());
-                   AlarmManagerUtil.setAlarm(this, 0, Integer.parseInt(times[0]), Integer.parseInt
-                           (times[1]), 0, 0, tv_alarm_label.getText().toString(), ring,uri);
+                   alarmid++;
+                   if(db.insertData(alarmid,Integer.parseInt(times[0]), Integer.parseInt(times[1]),tv_alarm_label.getText().toString(),0,ring,String.valueOf(uri),1,0)){
+//                       AlarmManagerUtil.setAlarm(this, 0, Integer.parseInt(times[0]), Integer.parseInt
+//                               (times[1]), 0, 0, tv_alarm_label.getText().toString(), ring,uri);
+                       Toast.makeText(this, uri.toString(), Toast.LENGTH_SHORT).show();
+                   }
+
                }
-               if (cycle == -1) {//是只响一次的闹钟
-                    if(db.insertData(Integer.parseInt(times[0]), Integer.parseInt(times[1]),tv_alarm_label.getText().toString(),0,ring,uri.toString()))
+              else if (cycle == -1) {//是只响一次的闹钟
+                  alarmid++;
+                    if(db.insertData(alarmid,Integer.parseInt(times[0]), Integer.parseInt(times[1]),tv_alarm_label.getText().toString(),0,ring,String.valueOf(uri),1,1))
                    {
-                       Toast.makeText(this, "data added", Toast.LENGTH_SHORT).show();
-                       AlarmManagerUtil.setAlarm(this, 1, Integer.parseInt(times[0]), Integer.parseInt
-                               (times[1]), 0, 0, tv_alarm_label.getText().toString(), ring,uri);
+                       Toast.makeText(this, "Alarm on", Toast.LENGTH_SHORT).show();
+//                      AlarmManagerUtil.setAlarm(this, 1, Integer.parseInt(times[0]), Integer.parseInt
+//                               (times[1]), 0, 0, tv_alarm_label.getText().toString(), ring,uri);
+                 test_sound.setText(uri.toString());
                    }
                     else{
                         Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
                     }
 
                } else {//多选，周几的闹钟
+                  alarmid++;
                    String weeksStr = parseRepeat(cycle, 1);
                    String[] weeks = weeksStr.split(",");
+
                    for (int i = 0; i < weeks.length; i++) {
-                       AlarmManagerUtil.setAlarm(this, 2, Integer.parseInt(times[0]), Integer
+
+                       if(db.insertData(alarmid,Integer.parseInt(times[0]), Integer.parseInt(times[1]),tv_alarm_label.getText().toString(),Integer.parseInt(weeks[i]),ring,String.valueOf(uri),1,2))
+                       {
+                           Toast.makeText(this, "set", Toast.LENGTH_SHORT).show();
+                       }
+                           AlarmManagerUtil.setAlarm(this, 2, Integer.parseInt(times[0]), Integer
                                .parseInt(times[1]), i, Integer.parseInt(weeks[i]), tv_alarm_label.getText().toString(), ring,uri);
                    }
                }

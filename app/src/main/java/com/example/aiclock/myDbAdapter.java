@@ -23,20 +23,25 @@ public class myDbAdapter {
 
 
 
-    public boolean insertData(int hour, int min, String tips, int week, int sov, String soundtrack) {
+    public boolean insertData(int alarmid,int hour, int min, String tips, int week, int sov, String soundtrack,int status,int flag) {
         SQLiteDatabase dbb = myhelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
+        contentValues.put(myDbHelper.ALARMID,alarmid);
         contentValues.put(myDbHelper.HOUR,hour);
         contentValues.put(myDbHelper.MIN,min);
         contentValues.put(myDbHelper.TIPS,tips);
         contentValues.put(myDbHelper.WEEK,week);
         contentValues.put(myDbHelper.SOV,sov);
         contentValues.put(myDbHelper.SOUNDTRACK,soundtrack);
+        contentValues.put(myDbHelper.ALARMSTATUS,status);
+        contentValues.put(myDbHelper.FLAG,flag);
         long result = dbb.insert(myDbHelper.TABLE_NAME, null , contentValues);
 
         return result != -1;
 
     }
+
+
 
 
     public void deleteall(Context context)
@@ -49,13 +54,17 @@ public class myDbAdapter {
             e.printStackTrace();
         }
     }
+
 private Alarm cursorToAlarm(Cursor cursor){
         Alarm alarm = new Alarm();
     alarm.setId(cursor.getInt(cursor.getColumnIndex(myDbHelper.UID)));
+    alarm.setId(cursor.getInt(cursor.getColumnIndex(myDbHelper.ALARMID)));
     alarm.setHour(cursor.getInt(cursor.getColumnIndex(myDbHelper.HOUR)));
     alarm.setMin(cursor.getInt(cursor.getColumnIndex(myDbHelper.MIN)));
     alarm.setTips(cursor.getString(cursor.getColumnIndex(myDbHelper.TIPS)));
     alarm.setSoundtrack(Uri.parse(cursor.getString(cursor.getColumnIndex(myDbHelper.SOUNDTRACK))));
+    alarm.setStatus(cursor.getInt(cursor.getColumnIndex(myDbHelper.ALARMSTATUS)));
+    alarm.setWeeklength(cursor.getInt(cursor.getColumnIndex(myDbHelper.WEEKLENGTH)));
     return alarm;
 }
 
@@ -63,10 +72,11 @@ private Alarm cursorToAlarm(Cursor cursor){
         {
         SQLiteDatabase db = myhelper.getWritableDatabase();
         ArrayList<Alarm> mydata = new ArrayList<>();
-        String QUERY = "SELECT * FROM "+ myDbHelper.TABLE_NAME;
-        String[] columns = {myDbHelper.UID,myDbHelper.HOUR,myDbHelper.MIN,myDbHelper.TIPS,myDbHelper.SOUNDTRACK};
+        String[] columns = {myDbHelper.UID,myDbHelper.ALARMID,myDbHelper.HOUR,myDbHelper.MIN,myDbHelper.TIPS,myDbHelper.SOUNDTRACK,myDbHelper.ALARMSTATUS,myDbHelper.FLAG,myDbHelper.WEEKLENGTH};
+//       String[] columns = {myDbHelper.ALARMID};
         Cursor cursor =db.query(myDbHelper.TABLE_NAME,columns,null,null,null,null,null);
-        StringBuffer buffer= new StringBuffer();
+     // Cursor cursor = db.query(true,myDbHelper.TABLE_NAME,columns,null,null,null,null,null,null);
+//      Cursor cursor = db.rawQuery("SELECT DISTINCT " + myDbHelper.ALARMID + " FROM " + myDbHelper.TABLE_NAME,null);
        try
        {
            cursor.moveToFirst();
@@ -85,13 +95,23 @@ private Alarm cursorToAlarm(Cursor cursor){
         return mydata;
     }
 
-    public  int delete(String UID)
+    public  int delete(int id)
     {
         SQLiteDatabase db = myhelper.getWritableDatabase();
-        String[] whereArgs ={UID};
+        String[] whereArgs ={String.valueOf(id)};
 
         int count =db.delete(myDbHelper.TABLE_NAME ,myDbHelper.UID+" = ?",whereArgs);
         return  count;
+    }
+
+    public int updateStatus(int newstatus,int id)
+    {
+        SQLiteDatabase db = myhelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(myDbHelper.ALARMSTATUS,newstatus);
+        String[] whereArgs = {String.valueOf(id)};
+        int count = db.update(myDbHelper.TABLE_NAME,contentValues,myDbHelper.UID+" = ?",whereArgs);
+        return count;
     }
 
     public int updateName(String oldHour , String newHour)
@@ -109,17 +129,21 @@ private Alarm cursorToAlarm(Cursor cursor){
 
         private static final String DATABASE_NAME = "myDatabase";    // Database Name
         private static final String TABLE_NAME = "myAlarm";   // Table Name
-        private static final int DATABASE_Version = 1;   // Database Version
+        private static final int DATABASE_Version = 24;   // Database Version
         private static final String UID = "_id";     // Column I (Primary Key)
+        private static final String ALARMID = "AlarmID";
         private static final String HOUR = "Hour";//Column II
         private static final String MIN = "Min";
         private static final String TIPS = "Tips";
         private static final String WEEK = "Week";
         private static final String SOV = "SoundOrVibrator";
         private static final String SOUNDTRACK = "SoundTrack";
+        private static final String ALARMSTATUS = "AlarmStatus";
+        private static final String FLAG = "Flag";
+        private static final String WEEKLENGTH = "WeekLength";
         private static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME +
-                " (" + UID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + HOUR + " INTEGER ," + MIN + " INTEGER, " + TIPS + " VARCHAR(255)" +
-                "," + WEEK + " INTEGER," + SOV + " INTEGER," + SOUNDTRACK + " VARCHAR(255))";
+                " (" + UID + " INTEGER PRIMARY KEY AUTOINCREMENT,"+ ALARMID + " INTEGER,  " + HOUR + " INTEGER ," + MIN + " INTEGER, " + TIPS + " VARCHAR(255)" +
+                "," + WEEK + " INTEGER," + SOV + " INTEGER," + SOUNDTRACK + " VARCHAR(255), " + ALARMSTATUS + " INTEGER, "+ FLAG + " INTEGER, "+ WEEKLENGTH + " INTEGER)";
         private static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
         private Context context;
